@@ -192,6 +192,8 @@ class MotorService
     /*
      * Get the motor faults encountered so far.
      *
+     * Needs to be public so that robot_auto_test.cpp can access it.
+     *
      * @return the mapping of motors to the object describing their faults.
      */
     std::unordered_map<int, MotorFaultIndicator> getCachedMotorFaults();
