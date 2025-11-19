@@ -45,6 +45,9 @@ class TacticBase : public Tactic
      * @param capability_reqs_ The capability requirements for running this tactic
      * @param ai_config_ptr shared pointer to ai_config
      */
+
+    static_assert(std::is_constructible_v<FSM<TacticFsm>, TacticFsm, TacticSubFsms...>, "Tactic is not constructible from given Fsms");
+
     explicit TacticBase(const std::set<RobotCapability> &capability_reqs_,
                         std::shared_ptr<const TbotsProto::AiConfig> ai_config_ptr);
 
@@ -150,6 +153,7 @@ TacticBase<TacticFsm, TacticSubFsms...>::TacticBase(
       control_params(),
       capability_reqs(capability_reqs_)
 {
+    static_assert(std::is_constructible_v<FSM<TacticFsm>, TacticFsm, TacticSubFsms...>, "Tactic is not constructible from given Fsms");
     for (RobotId id = 0; id < MAX_ROBOT_IDS; id++)
     {
         fsm_map[id] = fsmInit();
