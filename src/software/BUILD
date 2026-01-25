@@ -1,4 +1,3 @@
-load("@bazel_lib//lib:write_source_files.bzl", "write_source_files")
 load("@pybind11_bazel//:build_defs.bzl", "pybind_extension", "pybind_library")
 load("@rules_pkg//pkg:tar.bzl", "pkg_tar")
 load("@thunderscope_deps//:requirements.bzl", "requirement")

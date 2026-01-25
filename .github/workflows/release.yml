@@ -16,7 +16,7 @@ on:
           - minor
           - patch
       release_tag:
-        description: 'Specify the new release tag name (e.g., v1.2.3)'
+        description: 'Specify the new release tag name (e.g., v1.2.3). Note that this will not succeed for commits before Jan 2026, when PR #3566 (New release workflow) was merged.'
         required: false
         type: string
       
