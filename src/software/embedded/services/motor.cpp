@@ -6,12 +6,11 @@
 #include "software/embedded/motor_controller/tmc_motor_controller.h"
 #include "software/logger/logger.h"
 
-MotorService::MotorService(const robot_constants::RobotConstants& robot_constants,
-                           std::unique_ptr<MotorController> motor_controller)
+MotorService::MotorService(const robot_constants::RobotConstants& robot_constants)
     : robot_constants_(robot_constants),
-      motor_controller_(std::move(motor_controller)),
+      motor_controller_(setupMotorController()),
       euclidean_to_four_wheel_(robot_constants),
-      dribbler_target_rpm_(0), 
+      dribbler_target_rpm_(0),
       drive_motor_mps_per_rpm_(2 * M_PI * robot_constants.wheel_radius_meters / 60),
       num_tracked_motor_resets_(0)
 {
@@ -30,7 +29,17 @@ void MotorService::reset()
     motor_controller_->reset();
 }
 
-
+std::unique_ptr<MotorController> MotorService::setupMotorController()
+{
+    if constexpr (MOTOR_BOARD == MotorBoard::TRINAMIC)
+    {
+        return std::make_unique<TmcMotorController>();
+    }
+    else
+    {
+        return std::make_unique<StSpinMotorController>(robot_constants_);
+    }
+}
 
 TbotsProto::MotorStatus MotorService::createMotorStatus(
     const WheelSpace_t& current_wheel_velocities, const double dribbler_rpm) const
@@ -95,8 +104,9 @@ TbotsProto::MotorStatus MotorService::createMotorStatus(
     return motor_status;
 }
 
-TbotsProto::MotorStatus MotorService::poll(const TbotsProto::MotorControl& motor_control,
-                                           const double time_elapsed_since_last_poll_s)
+void MotorService::poll(const TbotsProto::DirectControlPrimitive& primitive,
+                        TbotsProto::RobotStatus& robot_status,
+                        const double time_elapsed_since_last_poll_s)
 {
     if (anyMotorRequiresReset())
     {
@@ -167,6 +177,8 @@ TbotsProto::MotorStatus MotorService::poll(const TbotsProto::MotorControl& motor
         -current_euclidean_velocity[0]);
     motor_status.mutable_angular_velocity()->set_radians_per_second(
         current_euclidean_velocity[2]);
+
+    const TbotsProto::MotorControl& motor_control = primitive.motor_control();
 
     // Get target wheel velocities from the primitive
     if (motor_control.has_direct_per_wheel_control())
@@ -240,7 +252,7 @@ TbotsProto::MotorStatus MotorService::poll(const TbotsProto::MotorControl& motor
     motor_status.mutable_dribbler()->set_dribbler_rpm(
         static_cast<float>(dribbler_target_rpm_));
 
-    return motor_status;
+    *(robot_status.mutable_motor_status()) = motor_status;
 }
 
 void MotorService::trackMotorReset()

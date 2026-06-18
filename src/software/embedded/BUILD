@@ -58,8 +58,6 @@ cc_library(
     deps = [
         ":primitive_executor",
         "//proto:tbots_cc_proto",
-        "//software/embedded/motor_controller",
-        "//software/embedded/motor_controller:motor_board",
         "//software/embedded/services:imu",
         "//software/embedded/services:motor",
         "//software/embedded/services:power",
@@ -88,6 +86,11 @@ cc_binary(
 sh_binary(
     name = "setup_robot_software_deps",
     srcs = ["setup_robot_software_deps.sh"],
+)
+
+sh_binary(
+    name = "setup_openocd_deps",
+    srcs = ["setup_openocd_deps.sh"],
 )
 
 filegroup(
