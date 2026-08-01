@@ -58,7 +58,7 @@ void setup()
     geneva       = std::make_shared<Geneva>();
     executor     = std::make_shared<ControlExecutor>(charger, chicker, geneva);
     dribbler     = std::make_shared<Dribbler>();
-    charger->setCapacitorPin(HIGH);
+    charger->setCapacitorPin(LOW);
 }
 
 void loop()

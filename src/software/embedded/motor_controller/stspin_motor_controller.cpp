@@ -276,9 +276,14 @@ void StSpinMotorController::sendAndReceiveMessage(const MotorIndex motor,
                 std::copy(delimiter_pos, std::next(delimiter_pos, MESSAGE_SIZE),
                           message.begin());
                 processRx(motor, message);
-
-                return;
+                if (ack_seq_num == current_seq) return;
+                LOG(WARNING) << "Motor " << motor << " did not acknowledge message, seq_num not updated (seq_num "
+                 << static_cast<int>(motor_status_.at(motor).seq_num) << ") (MOSI error)";
+            } else {
+                LOG(WARNING) << "Motor " << motor << "has incorrect sequence number (MISO error?)";
             }
+        } else {
+            LOG(WARNING) << "Motor " << motor << "has incorrect CRC (MISO error)";
         }
 
         // Erase everything up to the start of the delimiter to look for the next
@@ -286,9 +291,8 @@ void StSpinMotorController::sendAndReceiveMessage(const MotorIndex motor,
         received_data.erase(received_data.begin(), std::next(delimiter_pos));
     }
 
-    LOG(WARNING) << "Motor " << motor << " did not acknowledge message (seq_num "
-                 << static_cast<int>(motor_status_.at(motor).seq_num) << ") after "
-                 << MAX_SPI_TRANSFER_ATTEMPTS << " SPI attempts; giving up";
+    LOG(WARNING) << "Motor " << motor << " had "
+                 << MAX_SPI_TRANSFER_ATTEMPTS << " SPI failures; giving up";
 }
 
 void StSpinMotorController::populateTx(const MotorIndex motor,

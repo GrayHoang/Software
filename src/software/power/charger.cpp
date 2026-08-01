@@ -12,7 +12,8 @@ Charger::Charger()
 
 void Charger::setCapacitorPin(bool pin_state)
 {
-    digitalWrite(CHRG, pin_state);
+    // I'm scared of flyback, remind me to change this if it makes it to review
+    digitalWrite(CHRG, LOW);
     if (pin_state)
     {
         charge_start_ms = millis();
